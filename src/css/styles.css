@@ -4,9 +4,10 @@
   | default @import url()
   |============================
 */
+
 /* Common styles */
-@import url('./reset.css');
-@import url('./base.css');
+@import url("./reset.css");
+@import url("./base.css");
 
 body {
   margin: 0;
@@ -121,6 +122,10 @@ main {
 
 .loader.is-visible {
   display: block;
+}
+
+.is-hidden {
+  display: none;
 }
 
 @keyframes spin {

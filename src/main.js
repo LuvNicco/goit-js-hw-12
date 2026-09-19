@@ -7,17 +7,21 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
+  showLoadMore,
+  hideLoadMore,
 } from "./js/render-functions.js";
 
 const form = document.querySelector(".form");
-const loadMoreBtn = document.querySelector(".load-more");
 
 let page = 1;
 let query = "";
 let totalHits = 0;
 
 form.addEventListener("submit", onSearch);
-loadMoreBtn.addEventListener("click", onLoadMore);
+
+document
+  .querySelector(".load-more")
+  .addEventListener("click", onLoadMore);
 
 async function onSearch(event) {
   event.preventDefault();
@@ -35,6 +39,7 @@ async function onSearch(event) {
   page = 1;
 
   clearGallery();
+  hideLoadMore();
   showLoader();
 
   try {
@@ -46,8 +51,6 @@ async function onSearch(event) {
           "Sorry, there are no images matching your search query. Please try again!",
       });
 
-      loadMoreBtn.classList.add("is-hidden");
-
       return;
     }
 
@@ -56,9 +59,13 @@ async function onSearch(event) {
     createGallery(data.hits);
 
     if (data.hits.length < 15 || page * 15 >= totalHits) {
-      loadMoreBtn.classList.add("is-hidden");
+      hideLoadMore();
+
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+      });
     } else {
-      loadMoreBtn.classList.remove("is-hidden");
+      showLoadMore();
     }
   } catch (error) {
     iziToast.error({
@@ -66,15 +73,15 @@ async function onSearch(event) {
     });
   } finally {
     hideLoader();
+    form.reset();
   }
-
-  form.reset();
 }
 
 async function onLoadMore() {
-  page += 1;
-
+  hideLoadMore();
   showLoader();
+
+  page += 1;
 
   try {
     const data = await getImagesByQuery(query, page);
@@ -82,7 +89,13 @@ async function onLoadMore() {
     createGallery(data.hits);
 
     if (page * 15 >= totalHits || data.hits.length < 15) {
-      loadMoreBtn.classList.add("is-hidden");
+      hideLoadMore();
+
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+      });
+    } else {
+      showLoadMore();
     }
 
     const galleryItem = document.querySelector(".gallery-item");
@@ -99,6 +112,8 @@ async function onLoadMore() {
     iziToast.error({
       message: "Something went wrong. Please try again!",
     });
+
+    showLoadMore();
   } finally {
     hideLoader();
   }
